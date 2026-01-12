@@ -1,0 +1,10 @@
+path: "/webhook"
+method: "POST"
+label:
+  en_US: Mercury Webhook
+description:
+  en_US: Receives transactions from the external poler
+
+extra:
+  python:
+    source: endpoints/webhook.py

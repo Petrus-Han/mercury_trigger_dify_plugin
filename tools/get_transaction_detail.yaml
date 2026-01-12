@@ -1,0 +1,34 @@
+identity:
+  name: get_transaction_detail
+  label:
+    en_US: Get Transaction Detail
+    zh_Hans: 获取交易详情
+  description:
+    en_US: Fetch full details for a specific Mercury transaction.
+    zh_Hans: 获取特定 Mercury 交易的完整详情。
+
+parameters:
+  - name: transaction_id
+    type: string
+    required: true
+    label:
+      en_US: Transaction ID
+      zh_Hans: 交易 ID
+
+output_schema:
+  type: object
+  properties:
+    id:
+      type: string
+    amount:
+      type: number
+    postedAt:
+      type: string
+    status:
+      type: string
+    note:
+      type: string
+    bankDescription:
+      type: string
+    counterpartyName:
+      type: string

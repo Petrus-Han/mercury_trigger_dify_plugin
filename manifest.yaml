@@ -1,0 +1,39 @@
+version: 0.2.0
+type: plugin
+author: Petrus
+name: mercury
+created_at: 2026-01-12T00:00:00Z
+label:
+  en_US: Mercury Sync
+  zh_Hans: Mercury 同步
+icon: _assets/icon.svg
+description:
+  en_US: Mercury Banking integration using Extension Endpoint for transaction sync.
+  zh_Hans: 使用扩展端点的 Mercury 银行集成，用于交易同步。
+
+meta:
+  version: 0.2.0
+  minimum_dify_version: 1.0.0
+  arch:
+    - amd64
+    - arm64
+  runner:
+    language: python
+    version: "3.12"
+    entrypoint: main
+
+resource:
+  memory: 134217728
+  permission:
+    tool:
+      enabled: true
+    endpoint:
+      enabled: true
+    app:
+      enabled: true
+
+plugins:
+  tools:
+    - provider/mercury.yaml
+  endpoints:
+    - group/mercury.yaml

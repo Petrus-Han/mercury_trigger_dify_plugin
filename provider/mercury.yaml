@@ -1,0 +1,18 @@
+identity:
+  author: Petrus
+  name: mercury
+  label:
+    en_US: Mercury
+    zh_Hans: Mercury 银行
+  icon: assets/icon.svg
+
+credentials_for_provider:
+  auth_type:
+    type: select
+    required: true
+    default: oauth
+    options:
+      - value: oauth
+        label:
+          en_US: OAuth 2.0
+          zh_Hans: OAuth 2.0

@@ -1,0 +1,26 @@
+identity:
+  name: get_accounts
+  label:
+    en_US: Get Bank Accounts
+    zh_Hans: 获取银行账户
+  description:
+    en_US: Fetch all bank accounts associated with your Mercury login.
+    zh_Hans: 获取与您的 Mercury 登录关联的所有银行账户。
+
+parameters: []
+
+output_schema:
+  type: array
+  items:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+      balance:
+        type: number
+      currency:
+        type: string
