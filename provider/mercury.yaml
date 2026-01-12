@@ -1,18 +1,81 @@
-identity:
-  author: Petrus
-  name: mercury
+subscription_schema:
+- name: webhook_secret
+  type: secret-input
+  required: false
   label:
-    en_US: Mercury
-    zh_Hans: Mercury 银行
-  icon: assets/icon.svg
+    en_US: Webhook Secret
+    zh_Hans: Webhook 密钥
+  help:
+    en_US: "The webhook signing secret returned by Mercury when creating the webhook. This is auto-populated during subscription and used for signature verification."
+    zh_Hans: "Mercury 创建 webhook 时返回的签名密钥。订阅时会自动填充，用于验证签名。"
 
-credentials_for_provider:
-  auth_type:
-    type: select
-    required: true
-    default: oauth
+subscription_constructor:
+  parameters:
+  - name: event_types
+    label:
+      en_US: Event Types
+      zh_Hans: 事件类型
+    type: checkbox
+    required: false
+    multiple: true
+    default:
+      - "transaction.created"
+      - "transaction.updated"
     options:
-      - value: oauth
+      - value: "transaction.created"
         label:
-          en_US: OAuth 2.0
-          zh_Hans: OAuth 2.0
+          en_US: Transaction Created
+          zh_Hans: 交易创建
+      - value: "transaction.updated"
+        label:
+          en_US: Transaction Updated
+          zh_Hans: 交易更新
+    description:
+      en_US: "Select which event types to subscribe to. If none selected, all events will be received."
+      zh_Hans: "选择要订阅的事件类型。如果不选择，将接收所有事件。"
+
+  - name: filter_paths
+    label:
+      en_US: Filter Paths (Optional)
+      zh_Hans: 过滤字段（可选）
+    type: string
+    required: false
+    placeholder:
+      en_US: "status,amount"
+      zh_Hans: "status,amount"
+    description:
+      en_US: "Comma-separated list of field paths to filter events by (e.g., 'status,amount'). When specified, webhooks are only sent when one of these fields changes."
+      zh_Hans: "逗号分隔的字段路径列表（如 'status,amount'）。指定后，只有这些字段变化时才会发送 webhook。"
+
+  credentials_schema:
+    access_token:
+      type: secret-input
+      required: true
+      label:
+        en_US: Mercury API Access Token
+        zh_Hans: Mercury API 访问令牌
+      placeholder:
+        en_US: Enter your Mercury API access token
+        zh_Hans: 输入您的 Mercury API 访问令牌
+      help:
+        en_US: "Get your access token from Mercury Settings > API Tokens. Requires 'webhooks:write' permission."
+        zh_Hans: "从 Mercury 设置 > API 令牌获取访问令牌。需要 'webhooks:write' 权限。"
+      url: https://mercury.com/settings/tokens
+
+events:
+- events/transaction.yaml
+
+identity:
+  author: petrus
+  name: mercury_trigger
+  label:
+    en_US: Mercury Transaction Trigger
+    zh_Hans: Mercury 交易触发器
+  description:
+    en_US: Receives real-time transaction events from Mercury Banking via webhook. Automatically manages webhook subscription lifecycle.
+    zh_Hans: 通过 webhook 实时接收 Mercury 银行的交易事件。自动管理 webhook 订阅生命周期。
+  icon: icon.svg
+
+extra:
+  python:
+    source: provider/mercury.py

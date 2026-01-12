@@ -9,7 +9,9 @@ identity:
 
 parameters: []
 
-output_schema:
+extra:
+  python:
+    source: tools/get_accounts.py
   type: array
   items:
     type: object

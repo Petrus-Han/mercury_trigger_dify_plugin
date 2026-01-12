@@ -1,0 +1,82 @@
+identity:
+  name: transaction
+  author: petrus
+  label:
+    en_US: Transaction Event
+    zh_Hans: 交易事件
+
+description:
+  en_US: Triggered when a new transaction is created or updated in Mercury
+  zh_Hans: 当 Mercury 中创建或更新交易时触发
+
+parameters:
+- name: operation_filter
+  label:
+    en_US: Operation Filter
+    zh_Hans: 操作类型过滤
+  type: select
+  required: false
+  default: all
+  options:
+    - value: all
+      label:
+        en_US: All (Created & Updated)
+        zh_Hans: 全部（创建和更新）
+    - value: created
+      label:
+        en_US: Created Only
+        zh_Hans: 仅创建
+    - value: updated
+      label:
+        en_US: Updated Only
+        zh_Hans: 仅更新
+  description:
+    en_US: Filter events by operation type
+    zh_Hans: 按操作类型过滤事件
+
+output_schema:
+  type: object
+  description: Mercury transaction event payload
+  properties:
+    event_id:
+      type: string
+      description: Unique identifier for the webhook event
+    transaction_id:
+      type: string
+      description: Mercury transaction ID
+    operation_type:
+      type: string
+      enum: [created, updated]
+      description: Type of operation (created or updated)
+    account_id:
+      type: string
+      description: Mercury account ID
+    amount:
+      type: number
+      description: Transaction amount (negative for debits, positive for credits)
+    status:
+      type: string
+      description: Transaction status (pending, posted, etc.)
+    posted_at:
+      type: string
+      format: date-time
+      description: Transaction posting date
+    counterparty_name:
+      type: string
+      description: Merchant or counterparty name
+    bank_description:
+      type: string
+      description: Bank-provided description
+    note:
+      type: string
+      description: User-provided note
+    category:
+      type: string
+      description: Transaction category
+    transaction_type:
+      type: string
+      description: Transaction type (debit, credit, wire, ach, etc.)
+
+extra:
+  python:
+    source: events/transaction.py

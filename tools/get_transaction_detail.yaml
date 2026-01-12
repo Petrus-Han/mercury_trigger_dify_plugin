@@ -7,6 +7,10 @@ identity:
     en_US: Fetch full details for a specific Mercury transaction.
     zh_Hans: 获取特定 Mercury 交易的完整详情。
 
+extra:
+  python:
+    source: tools/get_transaction_detail.py
+
 parameters:
   - name: transaction_id
     type: string

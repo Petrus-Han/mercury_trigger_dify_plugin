@@ -1,19 +1,19 @@
-version: 0.2.0
+version: 0.3.0
 type: plugin
-author: Petrus
-name: mercury
+author: petrus
+name: mercury_trigger
 created_at: 2026-01-12T00:00:00Z
 label:
-  en_US: Mercury Sync
-  zh_Hans: Mercury 同步
-icon: _assets/icon.svg
+  en_US: Mercury Transaction Trigger
+  zh_Hans: Mercury 交易触发器
+icon: icon.svg
 description:
-  en_US: Mercury Banking integration using Extension Endpoint for transaction sync.
-  zh_Hans: 使用扩展端点的 Mercury 银行集成，用于交易同步。
+  en_US: Mercury Banking trigger plugin for receiving transaction events. Works with external poller since Mercury doesn't support native webhooks.
+  zh_Hans: Mercury 银行触发器插件，用于接收交易事件。由于 Mercury 不支持原生 webhook，需配合外部轮询器使用。
 
 meta:
-  version: 0.2.0
-  minimum_dify_version: 1.0.0
+  version: 0.3.0
+  minimum_dify_version: 1.10.0
   arch:
     - amd64
     - arm64
@@ -23,17 +23,19 @@ meta:
     entrypoint: main
 
 resource:
-  memory: 134217728
+  memory: 1048576
   permission:
     tool:
       enabled: true
-    endpoint:
+    storage:
       enabled: true
-    app:
-      enabled: true
+      size: 1048576
 
 plugins:
-  tools:
+  triggers:
     - provider/mercury.yaml
-  endpoints:
-    - group/mercury.yaml
+
+tags:
+  - finance
+  - banking
+  - automation
