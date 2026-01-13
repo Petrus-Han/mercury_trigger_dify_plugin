@@ -1,18 +1,18 @@
-version: 0.3.0
+version: 0.4.0
 type: plugin
 author: petrus
-name: mercury_trigger
+name: mercury
 created_at: 2026-01-12T00:00:00Z
 label:
-  en_US: Mercury Transaction Trigger
-  zh_Hans: Mercury 交易触发器
+  en_US: Mercury Banking
+  zh_Hans: Mercury 银行
 icon: icon.svg
 description:
-  en_US: Mercury Banking trigger plugin for receiving transaction events. Works with external poller since Mercury doesn't support native webhooks.
-  zh_Hans: Mercury 银行触发器插件，用于接收交易事件。由于 Mercury 不支持原生 webhook，需配合外部轮询器使用。
+  en_US: Mercury Banking integration with webhook triggers and API tools for accounts and transactions.
+  zh_Hans: Mercury 银行集成，包含 webhook 触发器和账户、交易 API 工具。
 
 meta:
-  version: 0.3.0
+  version: 0.4.0
   minimum_dify_version: 1.10.0
   arch:
     - amd64
@@ -34,6 +34,8 @@ resource:
 plugins:
   triggers:
     - provider/mercury.yaml
+  tools:
+    - provider/mercury_tools.yaml
 
 tags:
   - finance

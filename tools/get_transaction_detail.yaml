@@ -1,38 +1,30 @@
 identity:
   name: get_transaction_detail
+  author: petrus
+  icon: icon.svg
   label:
     en_US: Get Transaction Detail
     zh_Hans: 获取交易详情
-  description:
+
+description:
+  human:
     en_US: Fetch full details for a specific Mercury transaction.
     zh_Hans: 获取特定 Mercury 交易的完整详情。
-
-extra:
-  python:
-    source: tools/get_transaction_detail.py
+  llm: Fetch detailed information about a Mercury transaction by its ID, including amount, status, counterparty, and description.
 
 parameters:
   - name: transaction_id
     type: string
     required: true
+    form: llm
     label:
       en_US: Transaction ID
       zh_Hans: 交易 ID
+    human_description:
+      en_US: The unique identifier of the Mercury transaction.
+      zh_Hans: Mercury 交易的唯一标识符。
+    llm_description: The Mercury transaction ID to fetch details for.
 
-output_schema:
-  type: object
-  properties:
-    id:
-      type: string
-    amount:
-      type: number
-    postedAt:
-      type: string
-    status:
-      type: string
-    note:
-      type: string
-    bankDescription:
-      type: string
-    counterpartyName:
-      type: string
+extra:
+  python:
+    source: tools/get_transaction_detail.py

@@ -1,0 +1,35 @@
+identity:
+  author: petrus
+  name: mercury_tools
+  label:
+    en_US: Mercury Banking Tools
+    zh_Hans: Mercury 银行工具
+  description:
+    en_US: Tools for querying Mercury Banking accounts and transactions
+    zh_Hans: 用于查询 Mercury 银行账户和交易的工具
+  icon: icon.svg
+  tags:
+    - finance
+
+credentials_for_provider:
+  access_token:
+    type: secret-input
+    required: true
+    label:
+      en_US: Mercury API Access Token
+      zh_Hans: Mercury API 访问令牌
+    placeholder:
+      en_US: Enter your Mercury API access token
+      zh_Hans: 输入您的 Mercury API 访问令牌
+    help:
+      en_US: Get your access token from Mercury Settings > API Tokens
+      zh_Hans: 从 Mercury 设置 > API 令牌获取访问令牌
+    url: https://mercury.com/settings/tokens
+
+extra:
+  python:
+    source: provider/mercury_tools_provider.py
+
+tools:
+  - tools/get_accounts.yaml
+  - tools/get_transaction_detail.yaml
