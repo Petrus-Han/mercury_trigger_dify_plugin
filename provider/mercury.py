@@ -4,10 +4,13 @@ import base64
 import hmac
 import hashlib
 import json
+import logging
 from typing import Any, Mapping
 
 import httpx
 from werkzeug import Request, Response
+
+logger = logging.getLogger(__name__)
 
 from dify_plugin.entities.provider_config import CredentialType
 from dify_plugin.entities.trigger import EventDispatch, Subscription, UnsubscribeResult
@@ -136,8 +139,15 @@ class MercurySubscriptionConstructor(TriggerSubscriptionConstructor):
     - Validating API credentials
     """
 
-    _API_BASE_URL = "https://api.mercury.com/api/v1"
+    _API_BASE_URLS = {
+        "production": "https://api.mercury.com/api/v1",
+        "sandbox": "https://sandbox.mercury.com/api/v1",
+    }
     _REQUEST_TIMEOUT = 15
+
+    def _get_api_base_url(self, credentials: Mapping[str, Any]) -> str:
+        """Get the API base URL. Uses sandbox environment for testing."""
+        return self._API_BASE_URLS["sandbox"]
 
     def _validate_api_key(self, credentials: Mapping[str, Any]) -> None:
         """Validate Mercury API access token."""
@@ -155,8 +165,9 @@ class MercurySubscriptionConstructor(TriggerSubscriptionConstructor):
         
         try:
             # Try to fetch accounts to validate token
+            api_base_url = self._get_api_base_url(credentials)
             response = httpx.get(
-                f"{self._API_BASE_URL}/accounts",
+                f"{api_base_url}/accounts",
                 headers=headers,
                 timeout=self._REQUEST_TIMEOUT
             )
@@ -207,35 +218,47 @@ class MercurySubscriptionConstructor(TriggerSubscriptionConstructor):
         # Build webhook configuration
         event_types: list[str] = parameters.get("event_types", [])
         filter_paths_str: str = parameters.get("filter_paths", "")
-        
+
         webhook_data: dict[str, Any] = {
             "url": endpoint,
         }
-        
+
         # Add event types if specified
         if event_types:
             webhook_data["eventTypes"] = event_types
-        
+
         # Parse and add filter paths if specified
         if filter_paths_str and filter_paths_str.strip():
             filter_paths = [p.strip() for p in filter_paths_str.split(",") if p.strip()]
             if filter_paths:
                 webhook_data["filterPaths"] = filter_paths
 
+        api_base_url = self._get_api_base_url(credentials)
+        logger.info(f"Creating Mercury webhook at {api_base_url}/webhooks")
+        logger.info(f"Webhook endpoint: {endpoint}")
+        logger.info(f"Webhook data: {json.dumps(webhook_data, indent=2)}")
+
         headers = {
-            "Authorization": f"Bearer {access_token}",
+            "Authorization": f"Bearer {access_token[:10]}...",  # Log only first 10 chars
             "Accept": "application/json;charset=utf-8",
             "Content-Type": "application/json;charset=utf-8",
         }
 
         try:
             response = httpx.post(
-                f"{self._API_BASE_URL}/webhooks",
+                f"{api_base_url}/webhooks",
                 json=webhook_data,
-                headers=headers,
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Accept": "application/json;charset=utf-8",
+                    "Content-Type": "application/json;charset=utf-8",
+                },
                 timeout=self._REQUEST_TIMEOUT
             )
+            logger.info(f"Mercury API response status: {response.status_code}")
+            logger.info(f"Mercury API response body: {response.text}")
         except httpx.RequestException as exc:
+            logger.error(f"Network error creating webhook: {exc}")
             raise SubscriptionError(
                 f"Network error while creating webhook: {exc}",
                 error_code="NETWORK_ERROR"
@@ -310,8 +333,9 @@ class MercurySubscriptionConstructor(TriggerSubscriptionConstructor):
         }
 
         try:
+            api_base_url = self._get_api_base_url(credentials)
             response = httpx.delete(
-                f"{self._API_BASE_URL}/webhooks/{external_id}",
+                f"{api_base_url}/webhooks/{external_id}",
                 headers=headers,
                 timeout=self._REQUEST_TIMEOUT
             )
@@ -346,4 +370,72 @@ class MercurySubscriptionConstructor(TriggerSubscriptionConstructor):
             message=f"Failed to delete webhook: {response.text}",
             error_code="WEBHOOK_DELETION_FAILED",
             external_response=response_data,
+        )
+
+    def _refresh_subscription(
+        self,
+        subscription: Subscription,
+        credentials: Mapping[str, Any],
+        credential_type: CredentialType,
+    ) -> Subscription:
+        """Refresh the webhook subscription.
+        
+        Mercury webhooks don't expire, so we just verify it still exists
+        and return the current subscription state.
+        """
+        external_id = subscription.properties.get("external_id")
+        
+        if not external_id:
+            raise SubscriptionError(
+                "Missing webhook ID for refresh",
+                error_code="MISSING_PROPERTIES",
+            )
+
+        access_token = credentials.get("access_token")
+        if not access_token:
+            raise SubscriptionError(
+                "Mercury API access token is required.",
+                error_code="MISSING_CREDENTIALS",
+            )
+
+        api_base_url = self._get_api_base_url(credentials)
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/json;charset=utf-8",
+        }
+
+        try:
+            response = httpx.get(
+                f"{api_base_url}/webhooks/{external_id}",
+                headers=headers,
+                timeout=self._REQUEST_TIMEOUT
+            )
+        except httpx.RequestException as exc:
+            raise SubscriptionError(
+                f"Network error while refreshing webhook: {exc}",
+                error_code="NETWORK_ERROR"
+            ) from exc
+
+        if response.status_code == 200:
+            webhook_data = response.json()
+            # Update properties with latest status
+            updated_properties = dict(subscription.properties)
+            updated_properties["status"] = webhook_data.get("status", "active")
+            
+            return Subscription(
+                endpoint=subscription.endpoint,
+                parameters=subscription.parameters,
+                properties=updated_properties,
+            )
+
+        if response.status_code == 404:
+            raise SubscriptionError(
+                f"Webhook {external_id} no longer exists on Mercury",
+                error_code="WEBHOOK_NOT_FOUND",
+            )
+
+        raise SubscriptionError(
+            f"Failed to refresh webhook: {response.text}",
+            error_code="WEBHOOK_REFRESH_FAILED",
         )
