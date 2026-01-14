@@ -1,4 +1,4 @@
-version: 0.4.0
+version: 0.4.1
 type: plugin
 author: petrus
 name: mercury_trigger
@@ -12,7 +12,7 @@ description:
   zh_Hans: Mercury 银行 webhook 触发器，用于接收实时交易事件。
 
 meta:
-  version: 0.4.0
+  version: 0.4.1
   minimum_dify_version: 1.10.0
   arch:
     - amd64

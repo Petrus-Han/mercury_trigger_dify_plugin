@@ -62,6 +62,26 @@ subscription_constructor:
         zh_Hans: "从 Mercury 设置 > API 令牌获取访问令牌。需要 'webhooks:write' 权限。"
       url: https://mercury.com/settings/tokens
 
+    api_environment:
+      type: select
+      required: true
+      default: sandbox
+      label:
+        en_US: API Environment
+        zh_Hans: API 环境
+      help:
+        en_US: "Choose the Mercury API environment. Use Sandbox for testing, Production for live data."
+        zh_Hans: "选择 Mercury API 环境。测试使用 Sandbox，生产数据使用 Production。"
+      options:
+        - value: sandbox
+          label:
+            en_US: Sandbox
+            zh_Hans: 沙盒环境
+        - value: production
+          label:
+            en_US: Production
+            zh_Hans: 生产环境
+
 events:
 - events/transaction.yaml
 
